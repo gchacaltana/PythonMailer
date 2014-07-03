@@ -1,0 +1,53 @@
+# -*- coding: utf8 -*-
+# author: Gonzalo Chacaltana @gchacaltanab
+import os
+import mailer
+import logging
+from jinja2 import Environment, FileSystemLoader
+
+def mail_connect():
+    sender = mailer.Mailer(
+            host='smtp.domain.org',
+            port=587,
+            use_tls=True,
+            usr='postmaster@domain.org',
+            pwd='********'
+        )
+    return sender
+
+def render_template(template_name):
+    template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    env = Environment(loader=FileSystemLoader(template_dir))
+    template = env.get_template(template_name)
+
+    return template.render()
+
+def send_mail():
+    email_subject = "Mensaje de Prueba"
+    email_to = "gchacaltanab@outlook.com"
+    email_from = "noreply@domain.com"
+    
+    #Plantilla a usar
+    html_body = render_template('saludo.html')
+    plain_body = render_template('saludo.html')
+    
+    message = mailer.Message(
+            Subject= email_subject.encode('utf-8'),
+            To=email_to,
+            From=email_from,
+            Body=plain_body,
+            Html=html_body
+        )
+    sender = mail_connect()
+    sender.send(message)
+    
+def main():
+    print "Iniciando envio de mensaje...."
+    send_mail()
+    print "\nFin de envio de mensaje."
+    
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        logging.error(e, exc_info=True)
